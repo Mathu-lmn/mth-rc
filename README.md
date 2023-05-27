@@ -21,6 +21,10 @@ Then, once you're in game, use the command /rc to get started !
 
 https://streamable.com/mewb2g
 
-**Link to the resource :** [mathu-lmn/mth-rc (github.com)](https://github.com/Mathu-lmn/mth-rc)
-
 Feel free to open an Issue or make a PR to help me improve this resource ! :smile:
+
+
+## Installation
+
+If you want to use this resource as an item for ox_inventory, you will find the item file in the `framework/ox_inventory` folder.
+Follow the comments in the lua file and add the image in the img folder to `ox_inventory/web/images` folder.

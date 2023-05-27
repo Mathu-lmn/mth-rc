@@ -9,7 +9,18 @@ local distanceCheck = nil
 local scaleform = nil
 local limit = nil
 
-RegisterCommand('rc', function()
+if Config.UseCommand then
+    RegisterCommand('rc', function()
+        ToggleRcCar()
+    end)
+end
+
+RegisterNetEvent('mth-rc:client:SpawnRcCar')
+AddEventHandler('mth-rc:client:SpawnRcCar', function()
+    ToggleRcCar()
+end)
+
+function ToggleRcCar()
     if rc_entity ~= nil then
         if distanceCheck < 3.0 then
             PlayAnim()
@@ -18,36 +29,59 @@ RegisterCommand('rc', function()
             ShowNotification("You are too far from the car!")
         end
     else
-        local playerPed = PlayerPedId()
-        local playerCoords = GetEntityCoords(playerPed)
-
-        RequestModel(rc_model)
-        local time = GetGameTimer()
-        while not HasModelLoaded(rc_model) do
-            Citizen.Wait(0)
-            if GetGameTimer() - time > 5000 then
-                print("Failed to load model " .. rc_model)
-                return
-            end
-        end
-
-        PlayAnim()
-        Wait(700)
-        local front_coords = GetOffsetFromEntityInWorldCoords(playerPed, 0.0, 1.0, 0.0)
-        rc_entity = CreateVehicle(rc_model, front_coords, GetEntityHeading(playerPed), true, false)
-        SetModelAsNoLongerNeeded(rc_model)
-        SetVehicleOnGroundProperly(rc_entity)
-        SetVehicleEngineOn(rc_entity, true, true, false)
-        SetVehicleMod(rc_entity, 48, math.random(0, GetNumVehicleMods(rc_entity, 48)), false)
-        SetEntityAsMissionEntity(rc_entity, true, true)
-        Wait(800)
-        rc_camera = CreateCam("DEFAULT_SCRIPTED_CAMERA", true)
-        AttachCamToEntity(rc_camera, rc_entity, 0.0, 0.0, 0.4, true)
-
-        CreateAnimLoop()
-        CreateRCLoop(rc_entity, rc_camera)
+        SpawnRcCar()
     end
-end)
+end
+
+function SpawnRcCar()
+    local playerPed = PlayerPedId()
+    local playerCoords = GetEntityCoords(playerPed)
+
+    RequestModel(rc_model)
+    local time = GetGameTimer()
+    while not HasModelLoaded(rc_model) do
+        Citizen.Wait(0)
+        if GetGameTimer() - time > 5000 then
+            print("Failed to load model " .. rc_model)
+            return
+        end
+    end
+
+    PlayAnim()
+    Wait(700)
+    local front_coords = GetOffsetFromEntityInWorldCoords(playerPed, 0.0, 1.0, 0.0)
+    rc_entity = CreateVehicle(rc_model, front_coords, GetEntityHeading(playerPed), true, false)
+    SetModelAsNoLongerNeeded(rc_model)
+    SetVehicleOnGroundProperly(rc_entity)
+    SetVehicleEngineOn(rc_entity, true, true, false)
+    SetVehicleMod(rc_entity, 48, math.random(0, GetNumVehicleMods(rc_entity, 48)), false)
+    SetEntityAsMissionEntity(rc_entity, true, true)
+    if Config.DisableCollision then
+        -- disable collision with the car but not with the world (don't want to fall through the ground)
+        SetEntityNoCollisionEntity(rc_entity, playerPed, false)
+        Citizen.CreateThread(function()
+            while DoesEntityExist(rc_entity) do
+                Citizen.Wait(5000)
+                -- get all players
+                local players = GetActivePlayers()
+                -- get player coords
+                playerCoords = GetEntityCoords(playerPed)
+                -- loop through all players
+                for _, player in pairs(players) do
+                    local playerPed = GetPlayerPed(player)
+                    SetEntityNoCollisionEntity(rc_entity, playerPed, false)
+                end
+            end
+        end)
+    end
+    Wait(800)
+    rc_camera = CreateCam("DEFAULT_SCRIPTED_CAMERA", true)
+    AttachCamToEntity(rc_camera, rc_entity, 0.0, 0.0, 0.4, true)
+
+    CreateAnimLoop()
+    CreateRCLoop(rc_entity, rc_camera)
+end
+
 
 function CreateAnimLoop()
     -- play animation on the ped (he is on the phone and controlling the car until the car is destroyed)
@@ -390,6 +424,7 @@ function DrawLimitScaleform()
 
     DrawScaleformMovieFullscreen(limit, 0, 0, 0, 100)
 end
+
 
 AddEventHandler("onResourceStop", function(resource)
     if resource == GetCurrentResourceName() then
