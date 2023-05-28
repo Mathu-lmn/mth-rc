@@ -2,7 +2,8 @@ local rc_entity = nil
 local rc_camera = nil
 local isCameraActive = false
 local index_vision = 0
-local rc_model = "rcbandito"
+local rc_model = `rcbandito`
+local controller = `prop_controller_01`
 local tablet = nil
 local distanceCheck = nil
 -- scaleforms
@@ -111,12 +112,12 @@ function CreateAnimLoop()
         Citizen.Wait(0)
     end
 
-    RequestModel("prop_controller_01")
-    while not HasModelLoaded("prop_controller_01") do
+    RequestModel(controller)
+    while not HasModelLoaded(controller) do
         Citizen.Wait(0)
     end
 
-    tablet = CreateObject(GetHashKey("prop_controller_01"), playerCoords, true, true, false)
+    tablet = CreateObject(controller, playerCoords, true, true, false)
     AttachEntityToEntity(tablet, PlayerPedId(), GetPedBoneIndex(PlayerPedId(), 18905), 0.15, 0.02, 0.09, -136.30, -54.8,
         5.4, true, true, false, true, 1, true)
 
