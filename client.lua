@@ -9,6 +9,7 @@ local distanceCheck = nil
 local scaleform = nil
 local limit = nil
 local blip = nil
+local outOfRange = false
 
 if Config.UseCommand then
     RegisterCommand('rc', function()
@@ -210,7 +211,7 @@ function CreateRCLoop(entity, cam)
             end
             if distanceCheck < Config.LoseConnectionDistance then
                 DrawInstructions()
-
+                outOfRange = false
                 -- FRONT / BACK
                 if IsControlPressed(0, 172) then
                     TaskVehicleTempAction(PlayerPedId(), rc_entity, 9, 1)
@@ -243,7 +244,10 @@ function CreateRCLoop(entity, cam)
                     TaskVehicleTempAction(PlayerPedId(), rc_entity, 5, 1)
                 end
             else
-                TaskVehicleTempAction(PlayerPedId(), rc_entity, 6, 1500)
+                if not outOfRange then
+                    TaskVehicleTempAction(PlayerPedId(), rc_entity, 6, 1500)
+                    outOfRange = true
+                end
             end
         end
     end)
