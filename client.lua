@@ -24,8 +24,11 @@ end)
 
 function ToggleRcCar()
     if rc_entity ~= nil then
-        if distanceCheck < 3.0 then
+        if distanceCheck < 5.0 and not Config.DespawnOnCommand then
             PlayAnim()
+            DeleteRc()
+        elseif Config.DespawnOnCommand then
+            ClearPedTasks(PlayerPedId())
             DeleteRc()
         else
             ShowNotification("You are too far from the car!")
@@ -120,7 +123,7 @@ function CreateAnimLoop()
     TaskPlayAnim(PlayerPedId(), animDict, animName, 3.0, -8, -1, 63, 0, 0, 0, 0)
 
     Citizen.CreateThread(function()
-        while DoesEntityExist(rc_entity) do
+        while not outOfRange and DoesEntityExist(rc_entity) do
             if not IsEntityPlayingAnim(PlayerPedId(), animDict, animName, 3) then
                 TaskPlayAnim(PlayerPedId(), animDict, animName, 3.0, -8, -1, 63, 0, 0, 0, 0)
             end
@@ -134,7 +137,7 @@ function CreateRCLoop(entity, cam)
     -- temp thread to allow destroying car with 'E' key before entering the camera mode
     Citizen.CreateThread(function()
         if Config.BlowUpEnabled then
-            while not isCameraActive and DoesEntityExist(rc_entity) do
+            while not isCameraActive and DoesEntityExist(rc_entity) and not outOfRange do
                 Citizen.Wait(0)
                 if IsControlJustPressed(0, 38) then
                     BlowUp()
@@ -160,7 +163,7 @@ function CreateRCLoop(entity, cam)
             Citizen.Wait(0)
 
             -- Toggle camera view with 'G' key
-            if IsControlJustPressed(0, 47) and rc_entity ~= nil then
+            if IsControlJustPressed(0, 47) and rc_entity ~= nil and not outOfRange then
                 if isCameraActive then
                     RenderScriptCams(false, false, 0, true, true)
                     isCameraActive = false
@@ -170,7 +173,7 @@ function CreateRCLoop(entity, cam)
                     isHeatVisionEnabled = false
                     Citizen.CreateThread(function()
                         if Config.BlowUpEnabled then
-                            while not isCameraActive and DoesEntityExist(rc_entity) do
+                            while not isCameraActive and DoesEntityExist(rc_entity) and not outOfRange do
                                 Citizen.Wait(0)
                                 if IsControlJustPressed(0, 38) then
                                     BlowUp()
@@ -209,9 +212,25 @@ function CreateRCLoop(entity, cam)
                     end)
                 end
             end
+
+            DrawDriveInstructions()
+
             if distanceCheck < Config.LoseConnectionDistance then
-                DrawInstructions()
-                outOfRange = false
+                if outOfRange == true then
+                    outOfRange = false
+                    ShowNotification("You are back in range !")
+                    CreateAnimLoop()
+                    Citizen.CreateThread(function()
+                        if Config.BlowUpEnabled then
+                            while not isCameraActive and DoesEntityExist(rc_entity) and not outOfRange do
+                                Citizen.Wait(0)
+                                if IsControlJustPressed(0, 38) then
+                                    BlowUp()
+                                end
+                            end
+                        end
+                    end)
+                end
                 -- FRONT / BACK
                 if IsControlPressed(0, 172) then
                     TaskVehicleTempAction(PlayerPedId(), rc_entity, 9, 1)
@@ -246,6 +265,28 @@ function CreateRCLoop(entity, cam)
             else
                 if not outOfRange then
                     TaskVehicleTempAction(PlayerPedId(), rc_entity, 6, 1500)
+                    -- reset camera to ped
+                    SetTimeout(300, function()
+                        RenderScriptCams(false, false, 0, true, true)
+                        isCameraActive = false
+                        SetSeethrough(false)
+                        SetNightvision(false)
+                        index_vision = 0
+                        isHeatVisionEnabled = false
+                        Citizen.CreateThread(function()
+                            if Config.BlowUpEnabled then
+                                while not isCameraActive and DoesEntityExist(rc_entity) and not outOfRange do
+                                    Citizen.Wait(0)
+                                    if IsControlJustPressed(0, 38) then
+                                        BlowUp()
+                                    end
+                                end
+                            end
+                        end)
+                        -- clear ped tasks
+                        ClearPedTasks(PlayerPedId())
+                        DeleteEntity(tablet)
+                    end)
                     outOfRange = true
                 end
             end
@@ -299,12 +340,7 @@ local steeringButtons = {
     },
 }
 
-local buttonsToDraw = {
-    {
-        ["label"] = "Toggle Camera",
-        ["button"] = "~INPUT_DETONATE~"
-    }
-}
+local buttonsToDraw = {}
 
 local inCameraButtons = {
     {
@@ -320,19 +356,18 @@ local notInCameraButtons = {
     }
 }
 
-function DrawInstructions()
-    buttonsToDraw = {
-        {
-            ["label"] = "Toggle Camera",
-            ["button"] = "~INPUT_DETONATE~"
-        }
-    }
+function DrawDriveInstructions()
+    buttonsToDraw = {}
     if distanceCheck <= Config.LoseConnectionDistance then
         for buttonIndex = 1, #steeringButtons do
             local steeringButton = steeringButtons[buttonIndex]
 
             table.insert(buttonsToDraw, steeringButton)
         end
+        table.insert(buttonsToDraw, {
+            ["label"] = "Toggle Camera",
+            ["button"] = "~INPUT_DETONATE~"
+        })
     end
 
     if isCameraActive then
@@ -341,7 +376,7 @@ function DrawInstructions()
 
             table.insert(buttonsToDraw, inCameraButton)
         end
-    elseif Config.BlowUpEnabled then
+    elseif Config.BlowUpEnabled and not outOfRange then
         for buttonIndex = 1, #notInCameraButtons do
             local notInCameraButton = notInCameraButtons[buttonIndex]
 
@@ -384,6 +419,7 @@ function BlowUp()
     AddExplosion(GetEntityCoords(rc_entity), 69, 0.5, true, false, 1.0)
     Wait(800)
     DeleteRc()
+    ClearPedTasks(PlayerPedId())
 end
 
 function DeleteRc()
@@ -391,7 +427,6 @@ function DeleteRc()
     RenderScriptCams(false, false, 0, true, true)
     DestroyCam(rc_camera)
     DeleteEntity(tablet)
-    ClearPedTasks(PlayerPedId())
     if DoesBlipExist(rc_blip) then
         RemoveBlip(rc_blip)
     end
