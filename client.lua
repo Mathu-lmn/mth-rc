@@ -291,6 +291,9 @@ function CreateRCLoop(entity, cam)
                     outOfRange = true
                 end
             end
+            if IsEntityDead(PlayerPedId()) then
+                DeleteRc()
+            end
         end
     end)
 end
