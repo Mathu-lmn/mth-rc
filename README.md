@@ -14,6 +14,19 @@ Then, once you're in game, use the command /rc to get started !
 * FREE
 * Configurable
 
+# COMMANDS:
+
+|COMMAND: | ACTION:|
+|---|---|
+| /rc | Use The RC Car |
+| E | Self Destruct |
+| LEFT ARROW KEY | Turn Left |
+| DOWNWARD ARROW KEY | Reverse |
+| UPWARD ARROW KEY | Forward |
+| RIGHT ARROW KEY | Turn Right |
+| G | Toggle RC Camera |
+| LEFT ALT | Change Vision Modes - Night / Thermal |
+
 
 *Demo :eyes:  :*
 
