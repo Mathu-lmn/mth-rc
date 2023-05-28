@@ -25,12 +25,14 @@ if Config.Recall then
         local carCoords = GetEntityCoords(rc_entity)         -- Get the car's coords.
         -- Check if there is a driver in the car, if not, create one.
         if GetPedInVehicleSeat(rc_entity, -1) == 0 then
-            RequestModel("player_one")
-            while not HasModelLoaded("player_one") do
+            local player = `player_one`
+            RequestModel(player)
+            while not HasModelLoaded(player) do
                 Citizen.Wait(0)
             end
-            driver = CreatePed(1, "player_one", carCoords.x, carCoords.y, carCoords.z, 0.0, false, true)
+            driver = CreatePed(1, player, carCoords.x, carCoords.y, carCoords.z, 0.0, false, true)
             SetPedIntoVehicle(driver, rc_entity, -1)
+            SetModelAsNoLongerNeeded(player)
         end
 
         local temp = GetPedInVehicleSeat(rc_entity, -1)
@@ -140,6 +142,7 @@ function CreateAnimLoop()
     tablet = CreateObject(controller, playerCoords, true, true, false)
     AttachEntityToEntity(tablet, PlayerPedId(), GetPedBoneIndex(PlayerPedId(), 18905), 0.15, 0.02, 0.09, -136.30, -54.8,
         5.4, true, true, false, true, 1, true)
+    SetModelAsNoLongerNeeded(controller)
 
     TaskPlayAnim(PlayerPedId(), animDict, animName, 3.0, -8, -1, 63, 0, 0, 0, 0)
 
