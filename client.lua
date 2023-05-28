@@ -8,6 +8,7 @@ local distanceCheck = nil
 -- scaleforms
 local scaleform = nil
 local limit = nil
+local blip = nil
 
 if Config.UseCommand then
     RegisterCommand('rc', function()
@@ -56,6 +57,8 @@ function SpawnRcCar()
     SetVehicleEngineOn(rc_entity, true, true, false)
     SetVehicleMod(rc_entity, 48, math.random(0, GetNumVehicleMods(rc_entity, 48)), false)
     SetEntityAsMissionEntity(rc_entity, true, true)
+    SetVehicleHasBeenOwnedByPlayer(rc_entity, true)
+    SetVehicleDoorsLocked(rc_entity, 2)
     if Config.DisableCollision then
         -- disable collision with the car but not with the world (don't want to fall through the ground)
         SetEntityNoCollisionEntity(rc_entity, playerPed, false)
@@ -74,6 +77,16 @@ function SpawnRcCar()
             end
         end)
     end
+    if Config.Blip then
+        blip = AddBlipForEntity(rc_entity)
+        SetBlipSprite(blip, 647)
+        SetBlipColour(blip, 5)
+        SetBlipScale(blip, 0.5)
+        SetBlipAsShortRange(blip, true)
+        BeginTextCommandSetBlipName("STRING")
+        AddTextComponentString("RC Car")
+        EndTextCommandSetBlipName(blip)
+    end
     Wait(800)
     rc_camera = CreateCam("DEFAULT_SCRIPTED_CAMERA", true)
     AttachCamToEntity(rc_camera, rc_entity, 0.0, 0.0, 0.4, true)
@@ -81,7 +94,6 @@ function SpawnRcCar()
     CreateAnimLoop()
     CreateRCLoop(rc_entity, rc_camera)
 end
-
 
 function CreateAnimLoop()
     -- play animation on the ped (he is on the phone and controlling the car until the car is destroyed)
@@ -101,8 +113,8 @@ function CreateAnimLoop()
     end
 
     tablet = CreateObject(GetHashKey("prop_controller_01"), playerCoords, true, true, false)
-    AttachEntityToEntity(tablet, PlayerPedId(), GetPedBoneIndex(PlayerPedId(), 18905), 0.15, 0.02, 0.09, -136.30, -54.8, 5.4,
-        true, true, false, true, 1, true)
+    AttachEntityToEntity(tablet, PlayerPedId(), GetPedBoneIndex(PlayerPedId(), 18905), 0.15, 0.02, 0.09, -136.30, -54.8,
+        5.4, true, true, false, true, 1, true)
 
     TaskPlayAnim(PlayerPedId(), animDict, animName, 3.0, -8, -1, 63, 0, 0, 0, 0)
 
@@ -133,8 +145,11 @@ function CreateRCLoop(entity, cam)
     Citizen.CreateThread(function()
         while DoesEntityExist(rc_entity) do
             distanceCheck = #(GetEntityCoords(PlayerPedId()) - GetEntityCoords(rc_entity))
-            if distanceCheck > Config.LoseConnectionDistance - 10.0 then
+            if distanceCheck > Config.LoseConnectionDistance - 15.0 then
                 ShowNotification("You are going too far !")
+            end
+            if NetworkHasControlOfEntity(rc_entity) == false then
+                NetworkRequestControlOfEntity(rc_entity)
             end
             Citizen.Wait(1500)
         end
@@ -193,39 +208,42 @@ function CreateRCLoop(entity, cam)
                     end)
                 end
             end
+            if distanceCheck < Config.LoseConnectionDistance then
+                DrawInstructions()
 
-            DrawInstructions()
-
-            -- FRONT / BACK
-            if IsControlPressed(0, 172) then
-                TaskVehicleTempAction(PlayerPedId(), rc_entity, 9, 1)
-            end
-            if IsControlPressed(0, 173) then
-                TaskVehicleTempAction(PlayerPedId(), rc_entity, 22, 1)
-            end
-            if IsControlJustReleased(0, 172) or IsControlJustReleased(0, 173) then
+                -- FRONT / BACK
+                if IsControlPressed(0, 172) then
+                    TaskVehicleTempAction(PlayerPedId(), rc_entity, 9, 1)
+                end
+                if IsControlPressed(0, 173) then
+                    TaskVehicleTempAction(PlayerPedId(), rc_entity, 22, 1)
+                end
+                if IsControlJustReleased(0, 172) or IsControlJustReleased(0, 173) then
+                    TaskVehicleTempAction(PlayerPedId(), rc_entity, 6, 1500)
+                end
+                -- LEFT / RIGHT + FRONT
+                if IsControlPressed(0, 174) and IsControlPressed(0, 173) then
+                    TaskVehicleTempAction(PlayerPedId(), rc_entity, 13, 1)
+                end
+                if IsControlPressed(0, 175) and IsControlPressed(0, 173) then
+                    TaskVehicleTempAction(PlayerPedId(), rc_entity, 14, 1)
+                end
+                -- LEFT / RIGHT + BACK
+                if IsControlPressed(0, 174) and IsControlPressed(0, 172) then
+                    TaskVehicleTempAction(PlayerPedId(), rc_entity, 7, 1)
+                end
+                if IsControlPressed(0, 175) and IsControlPressed(0, 172) then
+                    TaskVehicleTempAction(PlayerPedId(), rc_entity, 8, 1)
+                end
+                -- LEFT / RIGHT ONLY
+                if IsControlPressed(0, 174) and not IsControlPressed(0, 172) and not IsControlPressed(0, 173) then
+                    TaskVehicleTempAction(PlayerPedId(), rc_entity, 4, 1)
+                end
+                if IsControlPressed(0, 175) and not IsControlPressed(0, 172) and not IsControlPressed(0, 173) then
+                    TaskVehicleTempAction(PlayerPedId(), rc_entity, 5, 1)
+                end
+            else
                 TaskVehicleTempAction(PlayerPedId(), rc_entity, 6, 1500)
-            end
-            -- LEFT / RIGHT + FRONT
-            if IsControlPressed(0, 174) and IsControlPressed(0, 173) then
-                TaskVehicleTempAction(PlayerPedId(), rc_entity, 13, 1)
-            end
-            if IsControlPressed(0, 175) and IsControlPressed(0, 173) then
-                TaskVehicleTempAction(PlayerPedId(), rc_entity, 14, 1)
-            end
-            -- LEFT / RIGHT + BACK
-            if IsControlPressed(0, 174) and IsControlPressed(0, 172) then
-                TaskVehicleTempAction(PlayerPedId(), rc_entity, 7, 1)
-            end
-            if IsControlPressed(0, 175) and IsControlPressed(0, 172) then
-                TaskVehicleTempAction(PlayerPedId(), rc_entity, 8, 1)
-            end
-            -- LEFT / RIGHT ONLY
-            if IsControlPressed(0, 174) and not IsControlPressed(0, 172) and not IsControlPressed(0, 173) then
-                TaskVehicleTempAction(PlayerPedId(), rc_entity, 4, 1)
-            end
-            if IsControlPressed(0, 175) and not IsControlPressed(0, 172) and not IsControlPressed(0, 173) then
-                TaskVehicleTempAction(PlayerPedId(), rc_entity, 5, 1)
             end
         end
     end)
@@ -370,7 +388,11 @@ function DeleteRc()
     DestroyCam(rc_camera)
     DeleteEntity(tablet)
     ClearPedTasks(PlayerPedId())
+    if DoesBlipExist(rc_blip) then
+        RemoveBlip(rc_blip)
+    end
     -- Reset variables
+    rc_blip = nil
     rc_entity = nil
     rc_camera = nil
     tablet = nil
@@ -424,7 +446,6 @@ function DrawLimitScaleform()
 
     DrawScaleformMovieFullscreen(limit, 0, 0, 0, 100)
 end
-
 
 AddEventHandler("onResourceStop", function(resource)
     if resource == GetCurrentResourceName() then
