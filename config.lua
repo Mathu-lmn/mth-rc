@@ -15,3 +15,5 @@ Config.Blip = true
 
 -- If set to true, doing /rc while using one already will despawn it regardless of the distance between the player and the rc car
 Config.DespawnOnCommand = false
+
+Config.Recall = true

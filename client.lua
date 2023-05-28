@@ -11,6 +11,7 @@ local scaleform = nil
 local limit = nil
 local blip = nil
 local outOfRange = false
+local driver = nil
 
 if Config.UseCommand then
     RegisterCommand('rc', function()
@@ -18,6 +19,25 @@ if Config.UseCommand then
     end)
 end
 
+if Config.Recall then
+    RegisterCommand("recall", function()
+        local playerCoords = GetEntityCoords(PlayerPedId())  -- PlayerPedId() returns the player's ped ID.
+        local carCoords = GetEntityCoords(rc_entity)         -- Get the car's coords.
+        -- Check if there is a driver in the car, if not, create one.
+        if GetPedInVehicleSeat(rc_entity, -1) == 0 then
+            RequestModel("player_one")
+            while not HasModelLoaded("player_one") do
+                Citizen.Wait(0)
+            end
+            driver = CreatePed(1, "player_one", carCoords.x, carCoords.y, carCoords.z, 0.0, false, true)
+            SetPedIntoVehicle(driver, rc_entity, -1)
+        end
+
+        local temp = GetPedInVehicleSeat(rc_entity, -1)
+        TaskVehicleDriveToCoord(temp, rc_entity, playerCoords.x, playerCoords.y, playerCoords.z, 20.0, 0,
+            GetEntityModel(rc_entity), 786603, 2.0, true)
+    end)
+end
 RegisterNetEvent('mth-rc:client:SpawnRcCar')
 AddEventHandler('mth-rc:client:SpawnRcCar', function()
     ToggleRcCar()
@@ -146,6 +166,7 @@ function CreateRCLoop(entity, cam)
             end
         end
     end)
+
 
     Citizen.CreateThread(function()
         while DoesEntityExist(rc_entity) do
@@ -294,6 +315,36 @@ function CreateRCLoop(entity, cam)
             if IsEntityDead(PlayerPedId()) then
                 DeleteRc()
             end
+            if GetEntitySubmergedLevel(rc_entity) > 0.5 then
+                ShowNotification("Your RC has short circuited !")
+                -- make it spark electric
+                SetVehicleEngineHealth(rc_entity, 0)
+                CreateThread(function()
+                    RequestNamedPtfxAsset("core")
+                    -- Wait until it's done loading.
+                    while not HasNamedPtfxAssetLoaded("core") do
+                        Wait(0)
+                    end
+
+                    local particleTbl = {}
+
+                    for i = 0, 25 do
+                        UseParticleFxAsset("core")
+                        local partiResult = StartNetworkedParticleFxLoopedOnEntity("ent_dst_elec_fire_sp", rc_entity, 0.0,
+                            0.0, 0.0, 0.0, 0.0, 0.0, 1.5, false, false, false)
+                        particleTbl[#particleTbl + 1] = partiResult
+                        Wait(0)
+                    end
+
+                    Wait(1000)
+                    for _, particle in ipairs(particleTbl) do
+                        StopParticleFxLooped(particle, true)
+                    end
+                end)
+                Wait(1000)
+                ClearPedTasks(PlayerPedId())
+                DeleteRc()
+            end
         end
     end)
 end
@@ -428,6 +479,9 @@ end
 
 function DeleteRc()
     DeleteEntity(rc_entity)
+    if driver then
+        DeleteEntity(driver)
+    end
     RenderScriptCams(false, false, 0, true, true)
     DestroyCam(rc_camera)
     DeleteEntity(tablet)
