@@ -19,6 +19,7 @@ Then, once you're in game, use the command /rc to get started !
 |COMMAND: | ACTION:|
 |---|---|
 | /rc | Use The RC Car |
+| /recall | Recall RC Car to Player |
 | E | Self Destruct |
 | LEFT ARROW KEY | Turn Left |
 | DOWNWARD ARROW KEY | Reverse |
