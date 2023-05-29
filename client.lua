@@ -38,6 +38,18 @@ if Config.Recall then
         local temp = GetPedInVehicleSeat(rc_entity, -1)
         TaskVehicleDriveToCoord(temp, rc_entity, playerCoords.x, playerCoords.y, playerCoords.z, 20.0, 0,
             GetEntityModel(rc_entity), 786603, 2.0, true)
+        CreateThread(function()
+            while driver ~= nil and DoesEntityExist(rc_entity) do
+                Wait(50)
+                local ped = PlayerPedId()
+                local playerCoords = GetEntityCoords(ped)
+                local carCoords = GetEntityCoords(rc_entity)
+                if #(playerCoords - carCoords) < 3.0 then
+                  DeleteEntity(driver)
+                  driver = nil
+                end
+            end
+        end)
     end)
 end
 RegisterNetEvent('mth-rc:client:SpawnRcCar')
@@ -478,6 +490,10 @@ function BlowUp()
     Wait(800)
     DeleteRc()
     ClearPedTasks(PlayerPedId())
+    if DoesEntityExist(driver) then
+        DeleteEntity(driver)
+        driver = nil
+    end
 end
 
 function DeleteRc()
