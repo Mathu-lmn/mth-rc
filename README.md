@@ -40,5 +40,10 @@ Feel free to open an Issue or make a PR to help me improve this resource ! :smil
 
 ## Installation
 
+**ox_inventory**
 If you want to use this resource as an item for ox_inventory, you will find the item file in the `framework/ox_inventory` folder.
 Follow the comments in the lua file and add the image in the img folder to `ox_inventory/web/images` folder.
+
+**qb-core**
+If you want to use this resource as an item for qb-core, you will find the item file in the `framework/qb-inventory` folder.
+Follow the comments in the lua file and add the image in the img folder to `qb-inventory\html\images` folder.
