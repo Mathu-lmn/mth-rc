@@ -13,6 +13,7 @@ Then, once you're in game, use the command /rc to get started !
 * Easy to use
 * FREE
 * Configurable
+* Support for ox_inventory and qb-core
 
 # COMMANDS:
 
