@@ -475,13 +475,18 @@ function BlowUp()
         return
     end
     AddExplosion(GetEntityCoords(rc_entity), 69, 0.5, true, false, 1.0)
-    Wait(800)
+    NetworkExplodeVehicle(rc_entity, false, false, false)
+    for i = 0, 7 do
+        BreakOffVehicleWheel(rc_entity, i, true, false, true, false)
+    end
+    Wait(1000)
+    --ExplodeVehicle(rc_entity, true, false)
     DeleteRc()
     ClearPedTasks(PlayerPedId())
 end
 
 function DeleteRc()
-    DeleteEntity(rc_entity)
+    --DeleteEntity(rc_entity)
     if driver then
         DeleteEntity(driver)
     end
