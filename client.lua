@@ -338,6 +338,8 @@ function CreateRCLoop(entity, cam)
                 if DoesBlipExist(blip) then
                     RemoveBlip(blip)
                 end
+                SetSeethrough(false)
+                SetNightvision(false)
                 -- Reset variables
                 blip = nil
                 rc_entity = nil
@@ -496,6 +498,8 @@ function BlowUp()
     isCameraActive = false
     index_vision = 0
     isHeatVisionEnabled = false
+    SetSeethrough(false)
+    SetNightvision(false)
     ClearPedTasks(PlayerPedId())
 end
 
@@ -517,6 +521,8 @@ function DeleteRc()
     tablet = nil
     isCameraActive = false
     index_vision = 0
+    SetSeethrough(false)
+    SetNightvision(false)
     isHeatVisionEnabled = false
 end
 
