@@ -457,13 +457,28 @@ function BlowUp()
         return
     end
     AddExplosion(GetEntityCoords(rc_entity), 69, 0.5, true, false, 1.0)
-    Wait(800)
-    DeleteRc()
-    ClearPedTasks(PlayerPedId())
-    if DoesEntityExist(driver) then
-        DeleteEntity(driver)
-        driver = nil
+    for i = 0, 7 do
+        BreakOffVehicleWheel(rc_entity, i, true, false, true, false)
     end
+    Wait(1000)
+    if driver then
+        DeleteEntity(driver)
+    end
+    RenderScriptCams(false, false, 0, true, true)
+    DestroyCam(rc_camera)
+    DeleteEntity(tablet)
+    if DoesBlipExist(rc_blip) then
+        RemoveBlip(rc_blip)
+    end
+    -- Reset variables
+    rc_blip = nil
+    rc_entity = nil
+    rc_camera = nil
+    tablet = nil
+    isCameraActive = false
+    index_vision = 0
+    isHeatVisionEnabled = false
+    ClearPedTasks(PlayerPedId())
 end
 
 function DeleteRc()
