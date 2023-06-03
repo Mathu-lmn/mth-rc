@@ -2,9 +2,9 @@ fx_version 'cerulean'
 game 'gta5'
 
 name "mth-rc"
-description "Script that allows you to spawn a rc-car and use it"
-author "Mathu_lmn"
-version "1.0.0"
+authors { 'Mathu_Imn', 'TayMcKenzieNZ', 'copofiscool' }
+description 'Control an RC vehicle with thermal and night vision, perfect for RP'
+version "1.0.4"
 
 client_scripts {
     'config.lua',
