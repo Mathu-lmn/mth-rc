@@ -329,7 +329,23 @@ function CreateRCLoop(entity, cam)
                 end)
                 Wait(1000)
                 ClearPedTasks(PlayerPedId())
-                DeleteRc()
+                if driver then
+                    DeleteEntity(driver)
+                end
+                RenderScriptCams(false, false, 0, true, true)
+                DestroyCam(rc_camera)
+                DeleteEntity(tablet)
+                if DoesBlipExist(rc_blip) then
+                    RemoveBlip(rc_blip)
+                end
+                -- Reset variables
+                rc_blip = nil
+                rc_entity = nil
+                rc_camera = nil
+                tablet = nil
+                isCameraActive = false
+                index_vision = 0
+                isHeatVisionEnabled = false
             end
         end
     end)
