@@ -335,11 +335,11 @@ function CreateRCLoop(entity, cam)
                 RenderScriptCams(false, false, 0, true, true)
                 DestroyCam(rc_camera)
                 DeleteEntity(tablet)
-                if DoesBlipExist(rc_blip) then
-                    RemoveBlip(rc_blip)
+                if DoesBlipExist(blip) then
+                    RemoveBlip(blip)
                 end
                 -- Reset variables
-                rc_blip = nil
+                blip = nil
                 rc_entity = nil
                 rc_camera = nil
                 tablet = nil
@@ -507,11 +507,11 @@ function DeleteRc()
     RenderScriptCams(false, false, 0, true, true)
     DestroyCam(rc_camera)
     DeleteEntity(tablet)
-    if DoesBlipExist(rc_blip) then
-        RemoveBlip(rc_blip)
+    if DoesBlipExist(blip) then
+        RemoveBlip(blip)
     end
     -- Reset variables
-    rc_blip = nil
+    blip = nil
     rc_entity = nil
     rc_camera = nil
     tablet = nil
