@@ -38,18 +38,6 @@ if Config.Recall then
         local temp = GetPedInVehicleSeat(rc_entity, -1)
         TaskVehicleDriveToCoord(temp, rc_entity, playerCoords.x, playerCoords.y, playerCoords.z, 20.0, 0,
             GetEntityModel(rc_entity), 786603, 2.0, true)
-        CreateThread(function()
-            while driver ~= nil and DoesEntityExist(rc_entity) do
-                Wait(50)
-                local ped = PlayerPedId()
-                local playerCoords = GetEntityCoords(ped)
-                local carCoords = GetEntityCoords(rc_entity)
-                if #(playerCoords - carCoords) < 3.0 then
-                  DeleteEntity(driver)
-                  driver = nil
-                end
-            end
-        end)
     end)
 end
 RegisterNetEvent('mth-rc:client:SpawnRcCar')
@@ -174,7 +162,7 @@ function CreateRCLoop(entity, cam)
     -- temp thread to allow destroying car with 'E' key before entering the camera mode
     Citizen.CreateThread(function()
         if Config.BlowUpEnabled then
-            while not isCameraActive and DoesEntityExist(rc_entity) and not outOfRange do
+            while DoesEntityExist(rc_entity) and not outOfRange do
                 Citizen.Wait(0)
                 if IsControlJustPressed(0, 38) then
                     BlowUp()
@@ -209,16 +197,6 @@ function CreateRCLoop(entity, cam)
                     SetNightvision(false)
                     index_vision = 0
                     isHeatVisionEnabled = false
-                    Citizen.CreateThread(function()
-                        if Config.BlowUpEnabled then
-                            while not isCameraActive and DoesEntityExist(rc_entity) and not outOfRange do
-                                Citizen.Wait(0)
-                                if IsControlJustPressed(0, 38) then
-                                    BlowUp()
-                                end
-                            end
-                        end
-                    end)
                 else
                     RenderScriptCams(true, false, 0, true, true)
                     isCameraActive = true
@@ -260,7 +238,7 @@ function CreateRCLoop(entity, cam)
                     CreateAnimLoop()
                     Citizen.CreateThread(function()
                         if Config.BlowUpEnabled then
-                            while not isCameraActive and DoesEntityExist(rc_entity) and not outOfRange do
+                            while DoesEntityExist(rc_entity) and not outOfRange do
                                 Citizen.Wait(0)
                                 if IsControlJustPressed(0, 38) then
                                     BlowUp()
@@ -311,16 +289,6 @@ function CreateRCLoop(entity, cam)
                         SetNightvision(false)
                         index_vision = 0
                         isHeatVisionEnabled = false
-                        Citizen.CreateThread(function()
-                            if Config.BlowUpEnabled then
-                                while not isCameraActive and DoesEntityExist(rc_entity) and not outOfRange do
-                                    Citizen.Wait(0)
-                                    if IsControlJustPressed(0, 38) then
-                                        BlowUp()
-                                    end
-                                end
-                            end
-                        end)
                         -- clear ped tasks
                         ClearPedTasks(PlayerPedId())
                         DeleteEntity(tablet)
@@ -420,7 +388,7 @@ local inCameraButtons = {
     }
 }
 
-local notInCameraButtons = {
+local blowUpButton = {
     {
         ["label"] = "Self Destruct",
         ["button"] = "~INPUT_PICKUP~"
@@ -439,6 +407,13 @@ function DrawDriveInstructions()
             ["label"] = "Toggle Camera",
             ["button"] = "~INPUT_DETONATE~"
         })
+        if Config.BlowUpEnabled then
+            for buttonIndex = 1, #blowUpButton do
+                local blowUpButton = blowUpButton[buttonIndex]
+
+                table.insert(buttonsToDraw, blowUpButton)
+            end
+        end
     end
 
     if isCameraActive then
@@ -446,12 +421,6 @@ function DrawDriveInstructions()
             local inCameraButton = inCameraButtons[buttonIndex]
 
             table.insert(buttonsToDraw, inCameraButton)
-        end
-    elseif Config.BlowUpEnabled and not outOfRange then
-        for buttonIndex = 1, #notInCameraButtons do
-            local notInCameraButton = notInCameraButtons[buttonIndex]
-
-            table.insert(buttonsToDraw, notInCameraButton)
         end
     end
 
