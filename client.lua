@@ -25,13 +25,15 @@ if Config.Recall then
         local carCoords = GetEntityCoords(rc_entity)         -- Get the car's coords.
         -- Check if there is a driver in the car, if not, create one.
         if GetPedInVehicleSeat(rc_entity, -1) == 0 then
-            local player = `player_one`
+            local player = `cs_brad`
             RequestModel(player)
             while not HasModelLoaded(player) do
                 Citizen.Wait(0)
             end
             driver = CreatePed(1, player, carCoords.x, carCoords.y, carCoords.z, 0.0, false, true)
             SetPedIntoVehicle(driver, rc_entity, -1)
+            SetBlockingOfNonTemporaryEvents(driver, true)
+            -- can't talk
             SetModelAsNoLongerNeeded(player)
         end
 
