@@ -48,3 +48,17 @@ Follow the comments in the lua file and add the image in the img folder to `ox_i
 **qb-core**
 If you want to use this resource as an item for qb-core, you will find the item file in the `framework/qb-inventory` folder.
 Follow the comments in the lua file and add the image in the img folder to `qb-inventory\html\images` folder.
+
+**ESX default inventory**
+
+Add the item to your database and to register its use, add this snippet in a server sided script : 
+
+
+```lua
+ESX.RegisterUsableItem('cappuccino', function(source) --replace cappuccino for your id of the item which you add to the database
+    local xPlayer = ESX.GetPlayerFromId(source)
+    
+    xPlayer.removeInventoryItem('rcbandito', 1) --this will remove the item after the use
+    TriggerClientEvent('mth-rc:client:SpawnRcCar', source)
+end)
+```
