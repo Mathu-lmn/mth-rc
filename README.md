@@ -29,12 +29,10 @@ Then, once you're in game, use the command /rc to get started !
 | G | Toggle RC Camera |
 | LEFT ALT | Change Vision Modes - Night / Thermal |
 
-
 *Demo :eyes:  :*
 
-[Video](https://streamable.com/mewb2g)
 
-https://streamable.com/mewb2g
+[![Video Preview](https://img.youtube.com/vi/VXEGDvc9J-w/0.jpg)]([https://www.youtube.com/watch?v=aR7FJ6mFj8U](https://www.youtube.com/watch?v=VXEGDvc9J-w))
 
 Feel free to open an Issue or make a PR to help me improve this resource ! :smile:
 
