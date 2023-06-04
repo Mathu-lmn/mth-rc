@@ -1,6 +1,6 @@
 **Description :spiral_notepad:  :** 
 
-:wave:  Hello ! Today I'm releasing `mth-rc`, a resource created with @Dark-Animations and @TayMcKenzie. This resource is a standalone resource that allows you to spawn a rc car and control it with your keyboard. See the showcase video below to see how it works !
+:wave:  Hello ! Today I'm releasing `mth-rc`, a resource created with [TayMcKenzieNZ](https://github.com/TayMcKenzieNZ), [copofiscool](https://github.com/copofiscool) and [Darks Animations](https://www.gta5-mods.com/users/Darks%20Animations). This resource is a standalone resource that allows you to spawn a rc car and control it with your keyboard. See the showcase video below to see how it works !
 
 **Usage :hammer_and_wrench: :**
 
